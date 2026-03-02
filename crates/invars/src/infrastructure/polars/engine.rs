@@ -1,45 +1,44 @@
-use polars::prelude::*;
 use crate::engine::Engine;
 use crate::error::{ApplicationError, ApplicationResult};
-use crate::infrastructure::polars::checks;
+use crate::infrastructure::polars::{checks, kind::PolarsKind};
 use crate::report::Report;
 use crate::spec::Spec;
+use polars::prelude::*;
 
-pub struct PolarsEngine;
+/// Polars-based execution engine for evaluating invariants on a `DataFrame`.
+///
+/// This engine implements the generic `Engine` trait for `PolarsKind` invariants.
+///
+/// Execution flow:
+/// 1. Receives a `Spec` containing a collection of invariants.
+/// 2. Delegates execution to `checks::run_all`.
+/// 3. Collects all produced `Violation`s.
+/// 4. Builds and returns a `Report`.
+///
+/// This struct is intentionally stateless and lightweight.
+///
+/// # Example
+/// ```ignore
+/// let engine = EnginePolarsDataFrame;
+/// let report = engine.execute(&df, &spec)?;
+/// ```
+pub struct EnginePolarsDataFrame;
 
-impl PolarsEngine {
-    pub fn new() -> Self {
-        Self
-    }
-    pub fn execute_lazy(&self, lf: &LazyFrame, spec: &Spec) -> ApplicationResult<Report> {
-        let df = lf
-            .clone()
-            .collect()
-            .map_err(|e| ApplicationError::engine_failure(e.to_string()))?;
-
-        self.execute(&df, spec)
-    }
-}
-
-impl Default for PolarsEngine {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Engine for PolarsEngine {
+impl Engine<PolarsKind> for EnginePolarsDataFrame {
     type Dataset = DataFrame;
 
-    fn execute(&self, dataset: &Self::Dataset, spec: &Spec) -> ApplicationResult<Report> {
+    /// Executes all invariants from the provided `Spec` against the given `DataFrame`.
+    ///
+    /// Returns a `Report` containing zero or more violations.
+    ///
+    /// Errors occurring during Polars expression evaluation are
+    /// converted into `ApplicationError::engine_failure`.
+    fn execute(&self, df: &Self::Dataset, spec: &Spec<PolarsKind>) -> ApplicationResult<Report> {
+        let violations = checks::run_all(df, spec.invariants())
+            .map_err(|e| ApplicationError::engine_failure(e.to_string()))?;
+
         let mut report = Report::new();
-
-        for invariant in spec.invariants() {
-            let violations = checks::run(dataset, invariant)
-                .map_err(|e| ApplicationError::engine_failure(e.to_string()))?;
-
-            report.extend(violations);
-        }
-
+        report.extend(violations);
         Ok(report)
     }
 }

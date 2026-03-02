@@ -1,6 +1,6 @@
 pub mod checks;
 pub mod engine;
-pub mod error;
+pub mod kind;
+mod utils;
 
-pub use engine::PolarsEngine;
-pub use error::*;
+pub use engine::EnginePolarsDataFrame;

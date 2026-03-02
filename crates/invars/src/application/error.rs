@@ -1,6 +1,6 @@
-use std::{error::Error, fmt};
 use crate::report::ReportError;
 use crate::spec::error::SpecError;
+use std::{error::Error, fmt};
 
 #[derive(Debug)]
 pub enum ApplicationError {

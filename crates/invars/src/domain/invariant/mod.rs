@@ -1,34 +1,34 @@
-/// A declared rule applied to a dataset.
-///
-/// An `Invariant` describes a validation rule but does not contain
-/// execution logic or results.
-///
-/// Invariants are executed by an engine (e.g. `PolarsEngine`)
-/// and produce zero or more `Violation`s.
 mod display;
 pub mod error;
 pub mod value_object;
 
 use crate::invariant::error::{InvariantError, InvariantResult};
 use crate::invariant::value_object::id::InvariantId;
-use crate::invariant::value_object::name::InvariantName;
 use crate::scope::Scope;
 use crate::severity::Severity;
 use std::collections::BTreeMap;
+
+/// A declared rule applied to a dataset.
+///
+/// An `Invariant<K>` describes a validation rule but does not contain
+/// execution logic or results.
+///
+/// The type parameter `K` represents the invariant kind,
+/// defined by the infrastructure (e.g. `PolarsKind`, `SqlKind`).
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Invariant {
+pub struct Invariant<K> {
     id: InvariantId,
-    name: InvariantName,
+    kind: K,
     scope: Scope,
     severity: Severity,
     params: BTreeMap<String, String>,
 }
 
-impl Invariant {
-    pub fn new(id: InvariantId, name: InvariantName, scope: Scope) -> Self {
+impl<K> Invariant<K> {
+    pub fn new(id: InvariantId, kind: K, scope: Scope) -> Self {
         Self {
             id,
-            name,
+            kind,
             scope,
             severity: Severity::Error,
             params: BTreeMap::new(),
@@ -39,8 +39,8 @@ impl Invariant {
         &self.id
     }
 
-    pub fn name(&self) -> &InvariantName {
-        &self.name
+    pub fn kind(&self) -> &K {
+        &self.kind
     }
 
     pub fn scope(&self) -> &Scope {
@@ -59,6 +59,7 @@ impl Invariant {
         self.severity = severity;
         self
     }
+
     pub fn with_params(mut self, params: BTreeMap<String, String>) -> Self {
         self.params = params;
         self

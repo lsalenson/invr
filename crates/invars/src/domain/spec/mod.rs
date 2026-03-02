@@ -6,18 +6,17 @@ mod display;
 pub mod error;
 
 use crate::invariant::Invariant;
-use crate::invariant::error::InvariantError;
 use crate::invariant::value_object::id::InvariantId;
 use crate::spec::error::{SpecError, SpecResult};
 
 use std::collections::BTreeSet;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Spec {
-    invariants: Vec<Invariant>,
+pub struct Spec<K> {
+    invariants: Vec<Invariant<K>>,
 }
 
-impl Spec {
+impl<K> Spec<K> {
     pub fn new() -> Self {
         Self {
             invariants: Vec::new(),
@@ -26,33 +25,34 @@ impl Spec {
     pub fn validate(&self) -> SpecResult<()> {
         let mut seen: BTreeSet<InvariantId> = BTreeSet::new();
 
-        for (index, invariant) in self.invariants.iter().enumerate() {
-            if !seen.insert(invariant.id().clone()) {
-                return Err(SpecError::duplicate_invariant_id(invariant.id().clone()));
+        for invariant in &self.invariants {
+            let id = invariant.id().clone();
+            if !seen.insert(id.clone()) {
+                return Err(SpecError::duplicate_invariant_id(id));
             }
         }
 
         Ok(())
     }
-    pub fn from_invariants(invariants: Vec<Invariant>) -> Self {
+    pub fn from_invariants(invariants: Vec<Invariant<K>>) -> Self {
         Self { invariants }
     }
 
-    pub fn invariants(&self) -> &[Invariant] {
+    pub fn invariants(&self) -> &[Invariant<K>] {
         &self.invariants
     }
 
-    pub fn into_invariants(self) -> Vec<Invariant> {
+    pub fn into_invariants(self) -> Vec<Invariant<K>> {
         self.invariants
     }
 
-    pub fn push(&mut self, invariant: Invariant) {
+    pub fn push(&mut self, invariant: Invariant<K>) {
         self.invariants.push(invariant);
     }
 
     pub fn extend<I>(&mut self, invariants: I)
     where
-        I: IntoIterator<Item = Invariant>,
+        I: IntoIterator<Item = Invariant<K>>,
     {
         self.invariants.extend(invariants);
     }
@@ -65,16 +65,16 @@ impl Spec {
         self.invariants.len()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &Invariant> {
+    pub fn iter(&self) -> impl Iterator<Item = &Invariant<K>> {
         self.invariants.iter()
     }
 
-    pub fn find_by_id(&self, id: &InvariantId) -> Option<&Invariant> {
+    pub fn find_by_id(&self, id: &InvariantId) -> Option<&Invariant<K>> {
         self.invariants.iter().find(|inv| inv.id() == id)
     }
 }
 
-impl Default for Spec {
+impl<K> Default for Spec<K> {
     fn default() -> Self {
         Self::new()
     }
