@@ -85,6 +85,23 @@ pub fn run_all(df: &DataFrame, invariants: &[Invariant<PolarsKind>]) -> CheckRes
     Ok(violations)
 }
 
+///
+/// Builds the Polars `Expr` associated with a given invariant.
+///
+/// This function translates a domain-level `Invariant<PolarsKind>`
+/// into a concrete Polars expression that computes a metric.
+///
+/// Responsibilities:
+/// - Ignore metadata-only checks (handled in the direct phase).
+/// - Delegate expression construction to the appropriate module.
+/// - Return `None` when the invariant does not require lazy execution.
+///
+/// The resulting expression must:
+/// - Produce a single scalar metric (count, ratio, percentile, etc.).
+/// - Be aliased with the invariant ID by the caller.
+///
+/// This separation keeps execution orchestration (`run_all`) decoupled
+/// from invariant-specific logic.
 fn plan_expr(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     match inv.kind() {
         // Direct-only metadata checks (handled in phase 1)

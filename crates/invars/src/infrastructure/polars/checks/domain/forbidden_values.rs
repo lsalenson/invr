@@ -6,6 +6,25 @@ use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::AnyValue;
 use polars::prelude::*;
 
+/// Builds the Polars expression counting rows whose values ARE
+/// contained in a specified forbidden domain.
+///
+/// Required parameters:
+/// - `values`: comma-separated list of forbidden string values
+///   (e.g. "X,Y,Z")
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Splits the `values` parameter into a list
+/// - Builds a temporary `Series` representing the forbidden domain
+/// - Uses `is_in()` to check membership
+/// - Marks rows present in the forbidden set
+/// - Returns the total count of forbidden occurrences
+///
+/// The resulting metric represents the number of values
+/// violating the forbidden domain constraint.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -18,6 +37,14 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     Some(col(name).is_in(lit(series).implode(), false).sum())
 }
 
+/// Converts the computed forbidden value count into a `Violation`.
+///
+/// Logic:
+/// - Reads `violation_count` from the evaluated expression
+/// - Returns a violation if `violation_count > 0`
+///
+/// Produced metric:
+/// - `violation_count` (integer)
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let violation_count = value.try_extract::<i64>().ok()?;
 

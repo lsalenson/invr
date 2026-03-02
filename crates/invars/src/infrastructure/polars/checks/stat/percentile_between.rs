@@ -6,6 +6,22 @@ use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::AnyValue;
 use polars::prelude::*;
 
+
+/// Builds the Polars expression computing the requested percentile
+/// for the target numeric column.
+///
+/// Required parameters:
+/// - `p`: percentile as a float between 0.0 and 1.0
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Uses Polars `quantile()` with `QuantileMethod::Nearest`
+/// - Returns a single scalar representing the computed percentile value
+///
+/// The resulting metric represents the raw percentile value
+/// (it is NOT validated against bounds at this stage).
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -16,6 +32,18 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     Some(col(name).quantile(lit(p), QuantileMethod::Nearest))
 }
 
+/// Converts the computed percentile value into a bounded-range violation.
+///
+/// Required parameters:
+/// - `min`: minimum allowed percentile value (inclusive)
+/// - `max`: maximum allowed percentile value (inclusive)
+///
+/// Logic:
+/// - Reads the computed percentile value
+/// - Returns a violation if `percentile < min` OR `percentile > max`
+///
+/// Produced metric:
+/// - `percentile_value` (float)
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let percentile = value.try_extract::<f64>().ok()?;
 

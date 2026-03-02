@@ -5,6 +5,21 @@ use crate::violation::Violation;
 use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::*;
 
+///
+/// Builds the Polars expression computing the standard deviation
+/// of the target numeric column.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Casts the column to `Float64`
+/// - Computes the sample standard deviation using `std(1)`
+///   (delta degrees of freedom = 1)
+/// - Returns a single scalar representing the column standard deviation
+///
+/// The resulting metric represents the raw standard deviation value
+/// and is not validated against bounds at this stage.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -12,6 +27,18 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
 
     Some(col(name).cast(DataType::Float64).std(1))
 }
+///
+/// Converts the computed standard deviation into a maximum-threshold violation.
+///
+/// Required parameters:
+/// - `max`: maximum allowed standard deviation (float)
+///
+/// Logic:
+/// - Reads the computed `std` value
+/// - Returns a violation if `std > max`
+///
+/// Produced metric:
+/// - `std_dev` (float)
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let std = value.try_extract::<f64>().ok()?;
     let max: f64 = inv.require_param("max").ok()?.parse().ok()?;

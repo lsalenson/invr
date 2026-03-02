@@ -3,6 +3,22 @@ use crate::invariant::Invariant;
 use crate::scope::Scope;
 use polars::prelude::*;
 use polars::series::ops::NullBehavior;
+/// Builds the Polars expression counting gaps in a numeric sequence
+/// expected to increment by exactly 1 between consecutive rows.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Computes the difference between consecutive rows using `diff(1)`
+/// - Ignores nulls produced by the first row (`NullBehavior::Ignore`)
+/// - Marks rows where the difference is NOT equal to `1`
+/// - Sums the boolean mask to count sequence gaps
+///
+/// The resulting metric represents the number of sequence breaks.
+///
+/// A result of `0` means the column contains no gaps and
+/// follows a strictly incremental sequence (step = 1).
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;

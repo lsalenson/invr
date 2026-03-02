@@ -4,6 +4,30 @@ use crate::scope::Scope;
 use crate::violation::Violation;
 use polars::frame::DataFrame;
 
+
+/// Executes a direct (non-lazy) check ensuring that a column
+/// has the expected data type.
+///
+/// Required parameters:
+/// - `dtype`: expected Polars data type as a string
+///   (e.g. "Int64", "Utf8", "Float64")
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Verifies that the invariant kind is `PolarsKind::DTypeIs`
+/// - Extracts the expected `dtype` parameter
+/// - Reads the actual column dtype using `df.column(name)?.dtype()`
+/// - Compares the string representations of both types
+/// - Returns a `Violation` if they differ
+///
+/// This check is evaluated immediately and does NOT participate
+/// in the Polars lazy execution pipeline.
+///
+/// A return value of `None` indicates that:
+/// - The column has the expected dtype, OR
+/// - The invariant kind / scope does not match this check.
 pub fn run_direct(df: &DataFrame, inv: &Invariant<PolarsKind>) -> Option<Violation> {
     if !matches!(inv.kind(), PolarsKind::DTypeIs) {
         return None;

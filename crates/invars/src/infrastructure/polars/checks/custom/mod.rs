@@ -5,14 +5,36 @@ use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::AnyValue;
 use polars::prelude::*;
 
-/// Simple custom expression that must evaluate to boolean per-row.
-/// We count rows where expression == true.
+/// Builds the Polars expression counting rows where a custom boolean
+/// expression evaluates to `false`.
+///
+/// Required parameters:
+/// - `column`: name of a column containing boolean values
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Casts the target column to `Boolean`
+/// - Compares values with `false`
+/// - Counts rows where the expression evaluates to `false`
+///
+/// The resulting metric represents the number of rows where
+/// the custom constraint failed.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let column = inv.require_param("column").ok()?;
 
     Some(col(column).cast(DataType::Boolean).eq(lit(false)).sum())
 }
 
+/// Converts the computed failure count into a `Violation`.
+///
+/// Logic:
+/// - Reads `failure_count` from the evaluated expression
+/// - Returns a violation if `failure_count > 0`
+///
+/// Produced metric:
+/// - `failure_count` (integer)
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let count = value.try_extract::<i64>().ok()?;
 

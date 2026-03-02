@@ -3,6 +3,22 @@ use crate::invariant::Invariant;
 use crate::scope::Scope;
 use polars::prelude::*;
 
+
+/// Builds the Polars expression counting rows where the string length
+/// exceeds the configured maximum.
+///
+/// Required parameters:
+/// - `max`: maximum allowed string length (inclusive)
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Computes `len_chars()` on the target column
+/// - Marks rows where length > max
+/// - Returns the total count of rows exceeding the maximum
+///
+/// The resulting metric represents the number of too-long values.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;

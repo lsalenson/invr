@@ -6,6 +6,22 @@ use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::AnyValue;
 use polars::prelude::*;
 
+
+/// Builds the Polars expression counting mismatching rows between
+/// two columns.
+///
+/// Required parameters:
+/// - `other_column`: name of the column to compare against
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Compares `col(name)` with `col(other_column)` using `!=`
+/// - Marks rows where values differ
+/// - Returns the total number of mismatching rows
+///
+/// The resulting metric represents the mismatch count.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -15,6 +31,14 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     Some(col(name).neq(col(other)).sum())
 }
 
+/// Converts the computed mismatch count into a violation.
+///
+/// Logic:
+/// - Reads `mismatch_count` from the evaluated expression
+/// - Returns a violation if `mismatch_count > 0`
+///
+/// Produced metric:
+/// - `mismatch_count` (integer)
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let mismatch_count = value.try_extract::<i64>().ok()?;
 

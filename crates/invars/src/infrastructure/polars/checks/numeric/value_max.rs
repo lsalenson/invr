@@ -3,6 +3,23 @@ use crate::invariant::Invariant;
 use crate::scope::Scope;
 use polars::prelude::*;
 
+///
+/// Builds the Polars expression counting rows where numeric values
+/// exceed a specified maximum threshold.
+///
+/// Required parameters:
+/// - `max`: maximum allowed value (inclusive)
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Casts the column to `Float64`
+/// - Marks rows where `value > max`
+/// - Returns the total count of rows exceeding the maximum
+///
+/// The resulting metric represents the number of values
+/// violating the upper bound constraint.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;

@@ -6,6 +6,23 @@ use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::AnyValue;
 use polars::prelude::*;
 
+
+///
+/// Builds the Polars expression counting values that do NOT match
+/// the provided regular expression.
+///
+/// Required parameters:
+/// - `pattern`: a valid regex pattern (string)
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Casts the column to `String`
+/// - Extracts the first regex capture
+/// - Counts rows where extraction returns `null`
+///
+/// The produced metric represents the number of invalid values.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -22,6 +39,16 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     )
 }
 
+///
+/// Converts the computed invalid match count into a `Violation`.
+///
+/// Logic:
+/// - Reads `invalid_count` from the evaluated expression
+/// - Returns a violation if `invalid_count > 0`
+///
+/// Produced metric:
+/// - `invalid_count` (integer)
+///
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let invalid_count = value.try_extract::<i64>().ok()?;
 

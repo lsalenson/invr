@@ -6,6 +6,18 @@ use crate::violation::Violation;
 use polars::datatypes::AnyValue;
 use polars::prelude::{Expr, col};
 
+///
+/// Builds the Polars expression counting NULL values in the target column.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Uses `is_null()` on the column
+/// - Sums the boolean mask to obtain the total number of NULL rows
+///
+/// The resulting metric represents the number of NULL values
+/// present in the column.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -14,6 +26,15 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     Some(col(name).is_null().sum())
 }
 
+///
+/// Converts the computed NULL count into a `Violation`.
+///
+/// Logic:
+/// - Reads `null_count` from the evaluated expression
+/// - Returns a violation if `null_count > 0`
+///
+/// Produced metric:
+/// - `null_count` (integer)
 pub fn map(inv: &Invariant<PolarsKind>, v: AnyValue) -> Option<Violation> {
     let count = v.try_extract::<i64>().ok()?;
     metric_violation::<PolarsKind>(inv, "null_count", count, format!("{count} nulls found"))
@@ -25,7 +46,6 @@ mod tests {
     use crate::domain::invariant::value_object::id::InvariantId;
     use crate::infrastructure::polars::kind::PolarsKind;
     use polars::prelude::*;
-    use std::collections::BTreeMap;
 
     fn make_invariant(column: &str) -> Invariant<PolarsKind> {
         let id = InvariantId::new("not_null_test").unwrap();

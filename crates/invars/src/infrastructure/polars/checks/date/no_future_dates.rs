@@ -3,6 +3,24 @@ use crate::invariant::Invariant;
 use crate::scope::Scope;
 use chrono::Utc;
 use polars::prelude::*;
+/// Builds the Polars expression counting rows where the date value
+/// is strictly in the future relative to the current UTC date.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Retrieves the current date using `Utc::now().date_naive()`
+/// - Compares each row with today's date
+/// - Marks rows where `date > today`
+/// - Returns the total count of future dates
+///
+/// The resulting metric represents the number of rows
+/// violating the no-future-dates constraint.
+///
+/// Note:
+/// - The current date is evaluated at execution time.
+/// - Dates equal to today are considered valid.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;

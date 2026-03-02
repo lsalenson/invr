@@ -6,6 +6,23 @@ use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::AnyValue;
 use polars::prelude::*;
 
+///
+/// Builds the Polars expression counting statistical outliers
+/// in the target numeric column using a Z-score threshold.
+///
+/// Required parameters:
+/// - `z`: Z-score threshold (float)
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Computes mean and standard deviation of the column
+/// - Calculates Z-score for each row
+/// - Marks rows where `|z_score| > z`
+/// - Returns the total count of detected outliers
+///
+/// The resulting metric represents the number of outlier rows.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -21,6 +38,22 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     )
 }
 
+///
+/// Converts the computed outlier count into a ratio-based violation.
+///
+/// Required parameters:
+/// - `row_count_cache`: total number of rows in the dataset
+/// - `max_ratio`: maximum allowed outlier ratio (float)
+///
+/// Logic:
+/// - Computes `ratio = outlier_count / total_rows`
+/// - Returns a violation if `ratio > max_ratio`
+///
+/// Produced metrics:
+/// - `outlier_ratio` (float)
+/// - `outlier_count` (integer)
+///
+/// If `total_rows == 0`, no violation is produced.
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let outlier_count = value.try_extract::<i64>().ok()?;
 

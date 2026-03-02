@@ -4,6 +4,20 @@ use crate::scope::Scope;
 use crate::violation::Violation;
 use polars::prelude::*;
 
+///
+/// Builds the Polars expression computing the mean value of the
+/// target numeric column.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Casts the column to `Float64`
+/// - Computes `mean()` over all rows
+/// - Returns a single scalar representing the column mean
+///
+/// The resulting metric represents the raw mean value and is not
+/// validated against bounds at this stage.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -11,6 +25,20 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
 
     Some(col(name).cast(DataType::Float64).mean())
 }
+
+///
+/// Converts the computed mean value into a bounded-range violation.
+///
+/// Required parameters:
+/// - `min`: minimum allowed mean (inclusive)
+/// - `max`: maximum allowed mean (inclusive)
+///
+/// Logic:
+/// - Reads the computed mean value
+/// - Returns a violation if `mean < min` OR `mean > max`
+///
+/// Produced metric (implicit in message):
+/// - mean value (float)
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let mean = value.try_extract::<f64>().ok()?;
 

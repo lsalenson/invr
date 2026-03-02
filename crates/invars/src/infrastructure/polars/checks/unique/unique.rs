@@ -6,6 +6,20 @@ use crate::violation::Violation;
 use polars::datatypes::AnyValue;
 use polars::prelude::{Expr, col};
 
+///
+/// Builds the Polars expression computing the number of unique values
+/// for the target column.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// The returned expression evaluates `n_unique()` on the column.
+///
+/// The metric produced by this expression represents the number
+/// of distinct values in the column.
+///
+/// The total row count is NOT computed here and must be provided
+/// separately via the `row_count_cache` parameter for `map()`.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -13,6 +27,19 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     Some(col(name).n_unique())
 }
 
+///
+/// Converts the computed unique value count into a duplication violation.
+///
+/// Required parameters:
+/// - `row_count_cache`: total number of rows in the dataset
+///
+/// Logic:
+/// - Reads `unique_count` from the evaluated expression
+/// - Computes `duplicate_count = total_rows - unique_count`
+/// - Returns a violation if `duplicate_count > 0`
+///
+/// Produced metric:
+/// - `duplicate_count` (integer)
 pub fn map(inv: &Invariant<PolarsKind>, v: AnyValue) -> Option<Violation> {
     let unique = v.try_extract::<i64>().ok()?;
     let total: i64 = inv.require_param("row_count_cache").ok()?.parse().ok()?;

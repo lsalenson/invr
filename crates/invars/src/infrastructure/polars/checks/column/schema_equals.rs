@@ -2,6 +2,30 @@ use crate::infrastructure::polars::kind::PolarsKind;
 use crate::invariant::Invariant;
 use crate::violation::Violation;
 use polars::frame::DataFrame;
+/// Executes a direct (non-lazy) check ensuring that the dataset schema
+/// exactly matches an expected definition.
+///
+/// Required parameters:
+/// - `schema`: expected schema represented as a comma-separated string
+///   of `column_name:dtype` pairs (e.g. "a:Int64,b:Utf8")
+///
+/// Scope:
+/// - Requires `Scope::Dataset`
+///
+/// Behavior:
+/// - Verifies that the invariant kind is `PolarsKind::SchemaEquals`
+/// - Extracts the expected `schema` parameter
+/// - Builds the actual schema string from the DataFrame columns
+///   using the format `name:dtype`
+/// - Compares the actual and expected schema strings
+/// - Returns a `Violation` if they differ
+///
+/// This check is evaluated immediately and does NOT participate
+/// in the Polars lazy execution pipeline.
+///
+/// A return value of `None` indicates that:
+/// - The schemas match exactly, OR
+/// - The invariant kind does not match this check.
 pub fn run_direct(df: &DataFrame, inv: &Invariant<PolarsKind>) -> Option<Violation> {
     if !matches!(inv.kind(), PolarsKind::SchemaEquals) {
         return None;

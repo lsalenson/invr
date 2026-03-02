@@ -6,6 +6,24 @@ use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::AnyValue;
 use polars::prelude::*;
 
+
+/// Builds the Polars expression counting rows where a target column
+/// is NULL while a given condition on another column is satisfied.
+///
+/// Required parameters:
+/// - `condition_column`: name of the column used in the condition
+/// - `condition_value`: value that activates the null constraint
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Compares `condition_column == condition_value`
+/// - Checks whether the target column is NULL
+/// - Counts rows where BOTH conditions are true
+///
+/// The resulting metric represents the number of rows that violate
+/// the conditional-not-null constraint.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -22,6 +40,14 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     )
 }
 
+/// Converts the computed conditional null violation count into a `Violation`.
+///
+/// Logic:
+/// - Reads `violation_count` from the evaluated expression
+/// - Returns a violation if `violation_count > 0`
+///
+/// Produced metric:
+/// - `violation_count` (integer)
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let violation_count = value.try_extract::<i64>().ok()?;
 

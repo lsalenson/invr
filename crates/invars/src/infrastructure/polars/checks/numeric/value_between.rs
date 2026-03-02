@@ -3,6 +3,24 @@ use crate::invariant::Invariant;
 use crate::scope::Scope;
 use polars::prelude::*;
 
+
+/// Builds the Polars expression counting rows where numeric values
+/// are outside a specified inclusive range.
+///
+/// Required parameters:
+/// - `min`: minimum allowed value (inclusive)
+/// - `max`: maximum allowed value (inclusive)
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Casts the column to `Float64`
+/// - Marks rows where `value < min` OR `value > max`
+/// - Returns the total count of out-of-range values
+///
+/// The resulting metric represents the number of rows violating
+/// the value range constraint.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;

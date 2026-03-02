@@ -6,6 +6,16 @@ use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::AnyValue;
 use polars::prelude::*;
 
+///
+/// Builds the Polars expression computing the number of unique values
+/// for the target column.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// The resulting metric represents the count of unique rows for
+/// the specified column. The total row count is not computed here
+/// and must be provided via parameters during `map()`.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -14,6 +24,21 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     Some(col(name).n_unique())
 }
 
+///
+/// Converts the computed unique count into a duplicate ratio violation.
+///
+/// Required parameters:
+/// - `max_ratio`: maximum allowed duplicate ratio (float)
+/// - `row_count_cache`: total number of rows (integer)
+///
+/// Logic:
+/// - Computes `duplicate_count = total_rows - unique_count`
+/// - Computes `ratio = duplicate_count / total_rows`
+/// - Returns a violation if `ratio > max_ratio`
+///
+/// Produced metrics:
+/// - `duplicate_ratio` (float)
+/// - `duplicate_count` (int)
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let unique_count = value.try_extract::<i64>().ok()?;
 

@@ -3,6 +3,21 @@ use crate::invariant::Invariant;
 use crate::scope::Scope;
 use polars::prelude::*;
 use polars::series::ops::NullBehavior;
+/// Builds the Polars expression counting rows that break
+/// a strictly monotonic increasing order.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Computes the difference between consecutive rows using `diff(1)`
+/// - Detects rows where the difference is negative (`< 0`)
+/// - Sums the boolean mask to count order violations
+///
+/// The resulting metric represents the number of monotonicity
+/// violations in the column.
+///
+/// A result of `0` means the column is monotonic increasing.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;

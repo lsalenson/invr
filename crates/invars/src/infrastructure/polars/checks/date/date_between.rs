@@ -4,6 +4,29 @@ use crate::scope::Scope;
 use chrono::NaiveDate;
 use polars::prelude::*;
 
+/// Builds the Polars expression counting rows where date values
+/// fall outside a specified inclusive range.
+///
+/// Required parameters:
+/// - `start`: lower bound date (format: "YYYY-MM-DD")
+/// - `end`: upper bound date (format: "YYYY-MM-DD")
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Parses `start` and `end` as `NaiveDate`
+/// - Compares the column against the bounds
+/// - Marks rows where `date < start` OR `date > end`
+/// - Returns the total count of out-of-range dates
+///
+/// The resulting metric represents the number of rows
+/// violating the date range constraint.
+///
+/// Note:
+/// - Bounds are inclusive. Dates equal to `start` or `end`
+///   are considered valid.
+
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;

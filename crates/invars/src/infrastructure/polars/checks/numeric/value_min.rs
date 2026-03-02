@@ -3,6 +3,27 @@ use crate::invariant::Invariant;
 use crate::scope::Scope;
 use polars::prelude::*;
 
+/// Builds the Polars expression counting rows where numeric values
+/// are strictly below a specified minimum threshold.
+///
+/// Required parameters:
+/// - `min`: minimum allowed value (inclusive)
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Casts the column to `Float64`
+/// - Marks rows where `value < min`
+/// - Returns the total count of rows below the minimum
+///
+/// The resulting metric represents the number of values
+/// violating the lower bound constraint.
+///
+/// Note:
+/// - The minimum bound is inclusive. Values where `value == min`
+///   are considered valid.
+
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;

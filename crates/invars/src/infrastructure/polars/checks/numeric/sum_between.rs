@@ -5,6 +5,20 @@ use crate::violation::Violation;
 use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::*;
 
+///
+/// Builds the Polars expression computing the sum of the
+/// target numeric column.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Casts the column to `Float64`
+/// - Computes `sum()` across all rows
+/// - Returns a single scalar representing the column sum
+///
+/// The resulting metric represents the raw sum value and is not
+/// validated against bounds at this stage.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -13,6 +27,19 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     Some(col(name).cast(DataType::Float64).sum())
 }
 
+///
+/// Converts the computed sum into a bounded-range violation.
+///
+/// Required parameters:
+/// - `min`: minimum allowed sum (inclusive)
+/// - `max`: maximum allowed sum (inclusive)
+///
+/// Logic:
+/// - Reads the computed sum value
+/// - Returns a violation if `sum < min` OR `sum > max`
+///
+/// Produced metric:
+/// - `sum` (float)
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let sum = value.try_extract::<f64>().ok()?;
     let min: f64 = inv.require_param("min").ok()?.parse().ok()?;

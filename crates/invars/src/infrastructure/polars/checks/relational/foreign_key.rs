@@ -6,6 +6,26 @@ use crate::violation::value_object::metric_value::MetricValue;
 use polars::prelude::AnyValue;
 use polars::prelude::*;
 
+
+/// Builds the Polars expression counting rows whose values are NOT
+/// contained in an allowed set (foreign key–like constraint).
+///
+/// Required parameters:
+/// - `allowed_values`: comma-separated list of allowed string values
+///   (e.g. "A,B,C")
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Splits `allowed_values` into a list
+/// - Builds a temporary Series representing the allowed domain
+/// - Uses `is_in()` to check membership
+/// - Marks rows NOT present in the allowed set
+/// - Returns the total count of invalid rows
+///
+/// The resulting metric represents the number of values
+/// violating the foreign key constraint.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -18,6 +38,14 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     Some(col(name).is_in(lit(series).implode(), false).not().sum())
 }
 
+/// Converts the computed invalid count into a `Violation`.
+///
+/// Logic:
+/// - Reads `invalid_count` from the evaluated expression
+/// - Returns a violation if `invalid_count > 0`
+///
+/// Produced metric:
+/// - `invalid_count` (integer)
 pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
     let invalid_count = value.try_extract::<i64>().ok()?;
 

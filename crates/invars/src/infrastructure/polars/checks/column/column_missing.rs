@@ -4,6 +4,25 @@ use crate::scope::Scope;
 use crate::violation::Violation;
 use polars::frame::DataFrame;
 
+
+/// Executes a direct (non-lazy) check ensuring that a specified column
+/// is absent from the provided `DataFrame`.
+///
+/// This check is evaluated immediately and does NOT participate in the
+/// Polars lazy execution pipeline.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Verifies that the invariant kind is `PolarsKind::ColumnMissing`
+/// - Extracts the column name from the invariant scope
+/// - Calls `df.column(name)` to test existence
+/// - Returns a `Violation` if the column IS present
+///
+/// A return value of `None` indicates that:
+/// - The column is absent (constraint satisfied), OR
+/// - The invariant kind / scope does not match this check.
 pub fn run_direct(df: &DataFrame, inv: &Invariant<PolarsKind>) -> Option<Violation> {
     if !matches!(inv.kind(), PolarsKind::ColumnMissing) {
         return None;

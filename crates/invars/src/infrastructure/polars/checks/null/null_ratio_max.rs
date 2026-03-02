@@ -5,6 +5,20 @@ use crate::violation::Violation;
 use polars::datatypes::AnyValue;
 use polars::prelude::{Expr, col};
 
+///
+/// Builds the Polars expression counting NULL values in the target column
+/// in order to compute a NULL ratio.
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Uses `is_null()` on the column
+/// - Aggregates with `sum()` to compute the total number of NULL rows
+///
+/// The resulting metric represents the raw NULL count.
+/// The ratio computation is performed later in `map()` using the
+/// `row_count_cache` parameter.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
@@ -12,6 +26,23 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     Some(col(name).is_null().sum())
 }
 
+///
+/// Converts the computed NULL count into a ratio-based violation.
+///
+/// Required parameters:
+/// - `row_count_cache`: total number of rows in the dataset
+/// - `max_ratio`: maximum allowed NULL ratio (float)
+///
+/// Logic:
+/// - Computes `ratio = null_count / total_rows`
+/// - Returns a violation if `ratio > max_ratio`
+///
+/// Produced metric (implicit in message):
+/// - null_ratio (float)
+///
+/// Note:
+/// - If `total_rows == 0`, behavior depends on the caller and should be
+///   guarded upstream to avoid division by zero.
 pub fn map(inv: &Invariant<PolarsKind>, v: AnyValue) -> Option<Violation> {
     let nulls = v.try_extract::<i64>().ok()?;
     let total: i64 = inv.require_param("row_count_cache").ok()?.parse().ok()?; // or inject

@@ -4,9 +4,40 @@ use crate::infrastructure::polars::kind::PolarsKind;
 use crate::infrastructure::polars::utils::metric_violation;
 use crate::invariant::Invariant;
 use crate::violation::Violation;
+/// Builds the Polars expression computing the total number of rows
+/// in the dataset.
+///
+/// Scope:
+/// - Dataset-level only
+///
+/// Behavior:
+/// - Uses `len()` to compute the row count
+/// - Casts the result to `Int64`
+/// - Returns a single scalar representing the dataset size
+///
+/// The resulting metric represents the raw `row_count` value.
 pub fn plan_row_count() -> Option<Expr> {
     Some(len().cast(DataType::Int64))
 }
+/// Converts the computed row count into a row-count-based violation.
+///
+/// Supported invariant kinds:
+/// - `RowCountMin`
+/// - `RowCountMax`
+/// - `RowCountBetween`
+///
+/// Required parameters depend on the invariant kind:
+/// - `min` for `RowCountMin`
+/// - `max` for `RowCountMax`
+/// - `min` and `max` for `RowCountBetween`
+///
+/// Logic:
+/// - Extracts the computed `row_count`
+/// - Applies the bound validation depending on `PolarsKind`
+/// - Returns a violation if the constraint is not satisfied
+///
+/// Produced metric:
+/// - `row_count` (integer)
 pub fn map_row_count(inv: &Invariant<PolarsKind>, v: AnyValue) -> Option<Violation> {
     let count = v.try_extract::<i64>().ok()?;
 

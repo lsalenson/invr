@@ -5,6 +5,18 @@ use crate::violation::Violation;
 use polars::datatypes::AnyValue;
 use polars::prelude::{Expr, as_struct, col};
 
+
+/// Builds the Polars expression computing the number of unique
+/// composite rows across multiple columns.
+///
+/// Required parameters:
+/// - `columns`: comma-separated list of column names (e.g. "a,b,c")
+///
+/// Behavior:
+/// - Creates a struct expression from the provided columns
+/// - Computes `n_unique()` on the resulting struct
+///
+/// The resulting metric represents the count of unique composite keys.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let cols = inv.require_param("columns").ok()?;
     let cols: Vec<_> = cols.split(',').collect();
@@ -12,6 +24,17 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     Some(as_struct(cols.iter().map(|c| col(*c)).collect::<Vec<_>>()).n_unique())
 }
 
+/// Converts the computed unique composite count into a `Violation`.
+///
+/// Required parameters:
+/// - `row_count_cache`: total number of rows in the dataset
+///
+/// Logic:
+/// - Reads the number of unique composite rows
+/// - Computes `duplicate_count = total_rows - unique_rows`
+/// - Returns a violation if `duplicate_count > 0`
+///
+/// Metric name: `duplicate_count`
 pub fn map(inv: &Invariant<PolarsKind>, v: AnyValue) -> Option<Violation> {
     let unique = v.try_extract::<i64>().ok()?;
     let total: i64 = inv.require_param("row_count_cache").ok()?.parse().ok()?;

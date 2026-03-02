@@ -3,6 +3,25 @@ use crate::invariant::Invariant;
 use crate::scope::Scope;
 use polars::prelude::*;
 
+///
+/// Builds the Polars expression counting rows where the string length
+/// is strictly below the configured minimum.
+///
+/// Required parameters:
+/// - `min`: minimum allowed string length (inclusive)
+///
+/// Scope:
+/// - Requires `Scope::Column`
+///
+/// Behavior:
+/// - Computes `len_chars()` on the target column
+/// - Marks rows where length < min
+/// - Returns the total count of rows below the minimum
+///
+/// The resulting metric represents the number of too-short values.
+///
+/// Note:
+/// - The minimum bound is inclusive. Values with length == min are valid.
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
     let Scope::Column { name } = inv.scope() else {
         return None;
