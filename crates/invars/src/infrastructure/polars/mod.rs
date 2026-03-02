@@ -3,4 +3,4 @@ pub mod engine;
 pub mod kind;
 mod utils;
 
-pub use engine::PolarsEngine;
+pub use engine::EnginePolarsDataFrame;

@@ -36,3 +36,96 @@ pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
         None
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::invariant::value_object::id::InvariantId;
+    use polars::prelude::*;
+    use std::collections::BTreeMap;
+
+    fn make_invariant(p: f64, min: f64, max: f64) -> Invariant<PolarsKind> {
+        let id = InvariantId::new("percentile_between_test").unwrap();
+        let mut params = BTreeMap::new();
+        params.insert("p".to_string(), p.to_string());
+        params.insert("min".to_string(), min.to_string());
+        params.insert("max".to_string(), max.to_string());
+
+        Invariant::new(
+            id,
+            PolarsKind::PercentileBetween,
+            Scope::Column {
+                name: "a".to_string(),
+            },
+        )
+        .with_params(params)
+    }
+
+    fn df(values: Vec<f64>) -> DataFrame {
+        let height = values.len();
+        let series = Series::new("a".into(), values);
+        DataFrame::new(height, vec![series.into()]).unwrap()
+    }
+
+    #[test]
+    fn test_plan_returns_expr() {
+        let inv = make_invariant(0.5, 0.0, 100.0);
+        assert!(plan(&inv).is_some());
+    }
+
+    #[test]
+    fn test_percentile_no_violation() {
+        let values = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let df = df(values);
+        let inv = make_invariant(0.5, 2.0, 4.0); // median should be 3
+
+        let result = df
+            .lazy()
+            .select([plan(&inv).unwrap()])
+            .collect()
+            .unwrap();
+
+        let val = result.columns()[0]
+            .get(0)
+            .unwrap()
+            .try_extract::<f64>()
+            .unwrap();
+
+        assert!(map(&inv, AnyValue::Float64(val)).is_none());
+    }
+
+    #[test]
+    fn test_percentile_violation_out_of_range() {
+        let values = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let df = df(values);
+        let inv = make_invariant(0.5, 4.5, 10.0); // median = 3, below min
+
+        let result = df
+            .lazy()
+            .select([plan(&inv).unwrap()])
+            .collect()
+            .unwrap();
+
+        let val = result.columns()[0]
+            .get(0)
+            .unwrap()
+            .try_extract::<f64>()
+            .unwrap();
+
+        let violation = map(&inv, AnyValue::Float64(val));
+        assert!(violation.is_some());
+    }
+
+    #[test]
+    fn test_wrong_scope_returns_none() {
+        let id = InvariantId::new("wrong_scope").unwrap();
+        let inv = Invariant::new(
+            id,
+            PolarsKind::PercentileBetween,
+            Scope::Dataset,
+        );
+
+        assert!(plan(&inv).is_none());
+    }
+}

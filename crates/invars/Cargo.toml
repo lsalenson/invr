@@ -15,3 +15,6 @@ polars = ["dep:polars"]
 [dependencies]
 polars = { version = "0.53", features = ["lazy", "is_in", "abs", "strings", "diff"], optional = true }
 chrono = "0.4.41"
+
+[dev-dependencies]
+proptest = "1"

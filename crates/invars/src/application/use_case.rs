@@ -21,7 +21,7 @@ where
             _marker: std::marker::PhantomData,
         }
     }
-
+    //TODO LOGGING + METRIC (ajout dans le report ?)
     pub fn run(&self, dataset: &E::Dataset, spec: &Spec<K>) -> ApplicationResult<Report> {
         spec.validate().map_err(ApplicationError::InvalidSpec)?;
 

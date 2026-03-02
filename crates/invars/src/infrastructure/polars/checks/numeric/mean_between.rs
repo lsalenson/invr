@@ -28,3 +28,105 @@ pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
         None
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::invariant::value_object::id::InvariantId;
+    use crate::infrastructure::polars::kind::PolarsKind;
+    use polars::prelude::*;
+    use std::collections::BTreeMap;
+
+    fn make_invariant(column: &str, min: f64, max: f64) -> Invariant<PolarsKind> {
+        let id = InvariantId::new("mean_between_test").unwrap();
+        let mut params = BTreeMap::new();
+        params.insert("min".to_string(), min.to_string());
+        params.insert("max".to_string(), max.to_string());
+
+        Invariant::new(
+            id,
+            PolarsKind::MeanBetween,
+            Scope::Column {
+                name: column.to_string(),
+            },
+        )
+        .with_params(params)
+    }
+
+    fn df(values: Vec<i32>) -> DataFrame {
+        let series = Series::new(PlSmallStr::from("a"), values);
+        DataFrame::new_infer_height(vec![series.into()]).unwrap()
+    }
+
+    #[test]
+    fn test_plan_returns_expr() {
+        let inv = make_invariant("a", 0.0, 10.0);
+        let expr = plan(&inv);
+        assert!(expr.is_some());
+    }
+
+    #[test]
+    fn test_mean_between_no_violation() {
+        let df = df(vec![1, 2, 3]); // mean = 2
+        let inv = make_invariant("a", 0.0, 5.0);
+
+        let result = df
+            .lazy()
+            .select([plan(&inv).unwrap()])
+            .collect()
+            .unwrap();
+
+        let value = result.columns()[0].get(0).unwrap();
+        let violation = map(&inv, value);
+
+        assert!(violation.is_none());
+    }
+
+    #[test]
+    fn test_mean_between_violation_low() {
+        let df = df(vec![1, 1, 1]); // mean = 1
+        let inv = make_invariant("a", 2.0, 5.0);
+
+        let result = df
+            .lazy()
+            .select([plan(&inv).unwrap()])
+            .collect()
+            .unwrap();
+
+        let value = result.columns()[0].get(0).unwrap();
+        let violation = map(&inv, value);
+
+        assert!(violation.is_some());
+    }
+
+    #[test]
+    fn test_mean_between_violation_high() {
+        let df = df(vec![10, 10, 10]); // mean = 10
+        let inv = make_invariant("a", 0.0, 5.0);
+
+        let result = df
+            .lazy()
+            .select([plan(&inv).unwrap()])
+            .collect()
+            .unwrap();
+
+        let value = result.columns()[0].get(0).unwrap();
+        let violation = map(&inv, value);
+
+        assert!(violation.is_some());
+    }
+
+    #[test]
+    fn test_wrong_scope_returns_none() {
+        let id = InvariantId::new("wrong_scope").unwrap();
+        let inv = Invariant::new(
+            id,
+            PolarsKind::MeanBetween,
+            Scope::Dataset,
+        );
+
+        let expr = plan(&inv);
+        assert!(expr.is_none());
+    }
+}

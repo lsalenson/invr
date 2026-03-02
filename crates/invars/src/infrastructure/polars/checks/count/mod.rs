@@ -5,7 +5,7 @@ use crate::infrastructure::polars::utils::metric_violation;
 use crate::invariant::Invariant;
 use crate::violation::Violation;
 pub fn plan_row_count() -> Option<Expr> {
-    Some(lit(1).count())
+    Some(len().cast(DataType::Int64))
 }
 pub fn map_row_count(inv: &Invariant<PolarsKind>, v: AnyValue) -> Option<Violation> {
     let count = v.try_extract::<i64>().ok()?;
@@ -50,5 +50,140 @@ pub fn map_row_count(inv: &Invariant<PolarsKind>, v: AnyValue) -> Option<Violati
             }
         }
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::infrastructure::polars::kind::PolarsKind;
+    use crate::invariant::Invariant;
+    use crate::prelude::Scope;
+    use polars::prelude::*;
+
+    fn make_invariant(kind: PolarsKind, params: &[(&str, &str)]) -> Invariant<PolarsKind> {
+        let mut inv = Invariant::new("test_id".to_string().parse().unwrap(), kind, Scope::Dataset);
+        for (k, v) in params {
+            inv = inv.with_param_value(k.to_string(), v.to_string());
+        }
+        inv
+    }
+
+    // -------------------------------------------------------------
+    // plan_row_count
+    // -------------------------------------------------------------
+
+    #[test]
+    fn test_plan_row_count_returns_expr() {
+        let expr = plan_row_count();
+        assert!(expr.is_some());
+    }
+
+    #[test]
+    fn test_plan_row_count_evaluates_correct_length() {
+        let df = df! {
+            "a" => &[1, 2, 3, 4, 5]
+        }
+        .unwrap();
+
+        let result = df
+            .lazy()
+            .select([plan_row_count().unwrap()])
+            .collect()
+            .unwrap();
+
+        let value = result.columns()[0].get(0).unwrap();
+        let count = value.try_extract::<i64>().unwrap();
+
+        assert_eq!(count, 5);
+    }
+
+    // -------------------------------------------------------------
+    // RowCountMin
+    // -------------------------------------------------------------
+
+    #[test]
+    fn test_row_count_min_violation() {
+        let inv = make_invariant(PolarsKind::RowCountMin, &[("min", "10")]);
+
+        let v = AnyValue::Int64(5);
+
+        let violation = map_row_count(&inv, v);
+
+        assert!(violation.is_some());
+    }
+
+    #[test]
+    fn test_row_count_min_no_violation() {
+        let inv = make_invariant(PolarsKind::RowCountMin, &[("min", "10")]);
+
+        let v = AnyValue::Int64(15);
+
+        let violation = map_row_count(&inv, v);
+
+        assert!(violation.is_none());
+    }
+
+    // -------------------------------------------------------------
+    // RowCountMax
+    // -------------------------------------------------------------
+
+    #[test]
+    fn test_row_count_max_violation() {
+        let inv = make_invariant(PolarsKind::RowCountMax, &[("max", "10")]);
+
+        let v = AnyValue::Int64(15);
+
+        let violation = map_row_count(&inv, v);
+
+        assert!(violation.is_some());
+    }
+
+    #[test]
+    fn test_row_count_max_no_violation() {
+        let inv = make_invariant(PolarsKind::RowCountMax, &[("max", "10")]);
+
+        let v = AnyValue::Int64(5);
+
+        let violation = map_row_count(&inv, v);
+
+        assert!(violation.is_none());
+    }
+
+    // -------------------------------------------------------------
+    // RowCountBetween
+    // -------------------------------------------------------------
+
+    #[test]
+    fn test_row_count_between_violation_low() {
+        let inv = make_invariant(PolarsKind::RowCountBetween, &[("min", "10"), ("max", "20")]);
+
+        let v = AnyValue::Int64(5);
+
+        let violation = map_row_count(&inv, v);
+
+        assert!(violation.is_some());
+    }
+
+    #[test]
+    fn test_row_count_between_violation_high() {
+        let inv = make_invariant(PolarsKind::RowCountBetween, &[("min", "10"), ("max", "20")]);
+
+        let v = AnyValue::Int64(25);
+
+        let violation = map_row_count(&inv, v);
+
+        assert!(violation.is_some());
+    }
+
+    #[test]
+    fn test_row_count_between_no_violation() {
+        let inv = make_invariant(PolarsKind::RowCountBetween, &[("min", "10"), ("max", "20")]);
+
+        let v = AnyValue::Int64(15);
+
+        let violation = map_row_count(&inv, v);
+
+        assert!(violation.is_none());
     }
 }

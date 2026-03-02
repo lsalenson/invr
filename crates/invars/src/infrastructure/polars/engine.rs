@@ -1,46 +1,17 @@
 use crate::engine::Engine;
 use crate::error::{ApplicationError, ApplicationResult};
-use crate::infrastructure::polars::checks;
-use crate::infrastructure::polars::kind::PolarsKind;
+use crate::infrastructure::polars::{checks, kind::PolarsKind};
 use crate::report::Report;
 use crate::spec::Spec;
 use polars::prelude::*;
 
-pub struct PolarsEngine;
+pub struct EnginePolarsDataFrame;
 
-impl PolarsEngine {
-    pub fn new() -> Self {
-        Self
-    }
-    pub fn execute_lazy(
-        &self,
-        lf: &LazyFrame,
-        spec: &Spec<PolarsKind>,
-    ) -> ApplicationResult<Report> {
-        let df = lf
-            .clone()
-            .collect()
-            .map_err(|e| ApplicationError::engine_failure(e.to_string()))?;
-
-        self.execute(&df, spec)
-    }
-}
-
-impl Default for PolarsEngine {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Engine<PolarsKind> for PolarsEngine {
+impl Engine<PolarsKind> for EnginePolarsDataFrame {
     type Dataset = DataFrame;
 
-    fn execute(
-        &self,
-        dataset: &Self::Dataset,
-        spec: &Spec<PolarsKind>,
-    ) -> ApplicationResult<Report> {
-        let violations = checks::run_all(dataset, spec.invariants())
+    fn execute(&self, df: &Self::Dataset, spec: &Spec<PolarsKind>) -> ApplicationResult<Report> {
+        let violations = checks::run_all(df, spec.invariants())
             .map_err(|e| ApplicationError::engine_failure(e.to_string()))?;
 
         let mut report = Report::new();

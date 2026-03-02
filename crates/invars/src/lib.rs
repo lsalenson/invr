@@ -10,8 +10,6 @@ mod domain;
 
 #[cfg(feature = "polars")]
 pub mod infrastructure;
-#[cfg(feature = "polars")]
-pub use polars;
 
 pub use crate::application::*;
 pub use crate::domain::*;
@@ -25,7 +23,7 @@ pub mod prelude {
     pub use crate::use_case::RunSpec;
 
     #[cfg(feature = "polars")]
-    pub use crate::infrastructure::polars::PolarsEngine;
+    pub use crate::infrastructure::polars::EnginePolarsDataFrame;
     #[cfg(feature = "polars")]
     pub use crate::infrastructure::polars::kind::PolarsKind;
 }

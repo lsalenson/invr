@@ -24,3 +24,92 @@ pub fn run_direct(df: &DataFrame, inv: &Invariant<PolarsKind>) -> Option<Violati
         None
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::domain::severity::Severity;
+    use polars::df;
+
+    fn make_invariant_column_missing(column: &str) -> Invariant<PolarsKind> {
+        Invariant::new(
+            "col_missing_test".to_string().parse().unwrap(),
+            PolarsKind::ColumnMissing,
+            Scope::Column {
+                name: column.to_string(),
+            },
+        )
+        .with_severity(Severity::Error)
+    }
+
+    #[test]
+    fn test_column_missing_ok_when_absent() {
+        let df = df! {
+            "a" => &[1, 2, 3]
+        }
+        .unwrap();
+
+        let inv = make_invariant_column_missing("missing");
+
+        let result = run_direct(&df, &inv);
+
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_column_missing_violation_when_present() {
+        let df = df! {
+            "a" => &[1, 2, 3]
+        }
+        .unwrap();
+
+        let inv = make_invariant_column_missing("a");
+
+        let result = run_direct(&df, &inv);
+
+        assert!(result.is_some());
+
+        let violation = result.unwrap();
+        assert_eq!(violation.invariant_id().as_str(), "col_missing_test");
+    }
+
+    #[test]
+    fn test_column_missing_wrong_scope_returns_none() {
+        let df = df! {
+            "a" => &[1, 2, 3]
+        }
+        .unwrap();
+
+        let inv = Invariant::new(
+            "wrong_scope_test".to_string().parse().unwrap(),
+            PolarsKind::ColumnMissing,
+            Scope::Dataset,
+        )
+        .with_severity(Severity::Error);
+
+        let result = run_direct(&df, &inv);
+
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_column_missing_wrong_kind_returns_none() {
+        let df = df! {
+            "a" => &[1, 2, 3]
+        }
+        .unwrap();
+
+        let inv = Invariant::new(
+            "other_kind_test".to_string().parse().unwrap(),
+            PolarsKind::RowCountMin,
+            Scope::Column {
+                name: "a".to_string(),
+            },
+        )
+        .with_severity(Severity::Error);
+
+        let result = run_direct(&df, &inv);
+
+        assert!(result.is_none());
+    }
+}

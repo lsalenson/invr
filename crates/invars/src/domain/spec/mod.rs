@@ -6,7 +6,6 @@ mod display;
 pub mod error;
 
 use crate::invariant::Invariant;
-use crate::invariant::error::InvariantError;
 use crate::invariant::value_object::id::InvariantId;
 use crate::spec::error::{SpecError, SpecResult};
 
@@ -26,9 +25,10 @@ impl<K> Spec<K> {
     pub fn validate(&self) -> SpecResult<()> {
         let mut seen: BTreeSet<InvariantId> = BTreeSet::new();
 
-        for (index, invariant) in self.invariants.iter().enumerate() {
-            if !seen.insert(invariant.id().clone()) {
-                return Err(SpecError::duplicate_invariant_id(invariant.id().clone()));
+        for invariant in &self.invariants {
+            let id = invariant.id().clone();
+            if !seen.insert(id.clone()) {
+                return Err(SpecError::duplicate_invariant_id(id));
             }
         }
 
