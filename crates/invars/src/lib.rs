@@ -31,16 +31,17 @@
 //! ## Quick Example (Polars)
 //!
 //! ```rust
+//! # #[cfg(feature = "polars")]
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! use invars::prelude::*;
 //! use polars::prelude::*;
 //!
-//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! let df = df! {
 //!     "age" => [18, 25, 130],
 //! }?;
 //!
 //! let invariant = Invariant::new(
-//!     "age_between".try_into()?,
+//!     "age_between".to_string().try_into()?,
 //!     PolarsKind::ValueBetween,
 //!     Scope::Column { name: "age".into() },
 //! )
@@ -51,7 +52,11 @@
 //! let violations = engine.evaluate(&df, vec![invariant])?;
 //!
 //! assert_eq!(violations.len(), 1);
-//! # Ok(()) }
+//! Ok(())
+//! # }
+//! #
+//! # #[cfg(not(feature = "polars"))]
+//! # fn main() {}
 //! ```
 //!
 //! ---
