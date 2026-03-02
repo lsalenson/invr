@@ -59,7 +59,6 @@ mod tests {
     use crate::infrastructure::polars::kind::PolarsKind;
     use crate::invariant::Invariant;
     use crate::prelude::Scope;
-    use polars::prelude::*;
 
     fn make_invariant(kind: PolarsKind, params: &[(&str, &str)]) -> Invariant<PolarsKind> {
         let mut inv = Invariant::new("test_id".to_string().parse().unwrap(), kind, Scope::Dataset);

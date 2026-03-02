@@ -1,10 +1,7 @@
 use crate::infrastructure::polars::kind::PolarsKind;
 use crate::invariant::Invariant;
 use crate::scope::Scope;
-use crate::violation::Violation;
-use crate::violation::value_object::metric_value::MetricValue;
 use chrono::NaiveDate;
-use polars::prelude::AnyValue;
 use polars::prelude::*;
 
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
@@ -32,7 +29,6 @@ mod tests {
     use crate::domain::invariant::value_object::id::InvariantId;
     use crate::scope::Scope;
     use chrono::NaiveDate;
-    use polars::prelude::*;
 
     fn make_invariant(start: &str, end: &str) -> Invariant<PolarsKind> {
         let id = InvariantId::new("date_between_test").unwrap();

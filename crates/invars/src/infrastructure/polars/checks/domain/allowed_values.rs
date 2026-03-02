@@ -41,7 +41,6 @@ mod tests {
     use super::*;
     use crate::domain::invariant::value_object::id::InvariantId;
     use crate::infrastructure::polars::kind::PolarsKind;
-    use polars::prelude::*;
 
     fn make_invariant(column: &str, allowed: &str) -> Invariant<PolarsKind> {
         let id = InvariantId::new("allowed_values_test").unwrap();

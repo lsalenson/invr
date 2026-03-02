@@ -25,7 +25,6 @@ mod tests {
     use super::*;
     use crate::domain::invariant::value_object::id::InvariantId;
     use crate::infrastructure::polars::kind::PolarsKind;
-    use polars::prelude::*;
     use std::collections::BTreeMap;
 
     fn make_invariant(column: &str, min: f64, max: f64) -> Invariant<PolarsKind> {

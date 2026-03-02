@@ -1,9 +1,6 @@
 use crate::infrastructure::polars::kind::PolarsKind;
 use crate::invariant::Invariant;
 use crate::scope::Scope;
-use crate::violation::Violation;
-use crate::violation::value_object::metric_value::MetricValue;
-use polars::prelude::AnyValue;
 use polars::prelude::*;
 
 pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
@@ -19,7 +16,6 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
 mod tests {
     use super::*;
     use crate::domain::invariant::value_object::id::InvariantId;
-    use polars::prelude::*;
     use std::collections::BTreeMap;
 
     fn make_invariant(column: &str, min: f64) -> Invariant<PolarsKind> {

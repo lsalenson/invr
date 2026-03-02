@@ -21,7 +21,6 @@ mod tests {
     use super::*;
     use crate::domain::invariant::value_object::id::InvariantId;
     use crate::infrastructure::polars::kind::PolarsKind;
-    use polars::prelude::*;
 
     fn make_invariant(column: &str) -> Invariant<PolarsKind> {
         let id = InvariantId::new("no_gaps_test").unwrap();

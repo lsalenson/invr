@@ -17,7 +17,6 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
 mod tests {
     use super::*;
     use crate::domain::invariant::value_object::id::InvariantId;
-    use polars::prelude::*;
     use std::collections::BTreeMap;
 
     fn make_invariant(column: &str, max: f64) -> Invariant<PolarsKind> {

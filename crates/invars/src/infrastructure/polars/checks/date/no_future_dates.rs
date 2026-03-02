@@ -19,7 +19,6 @@ mod tests {
     use crate::domain::invariant::value_object::id::InvariantId;
     use crate::infrastructure::polars::kind::PolarsKind;
     use chrono::{Duration, NaiveDate, Utc};
-    use polars::prelude::*;
 
     fn make_invariant(column: &str) -> Invariant<PolarsKind> {
         let id = InvariantId::new("no_future_test").unwrap();

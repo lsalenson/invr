@@ -54,7 +54,6 @@ pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
 mod tests {
     use super::*;
     use crate::domain::invariant::value_object::id::InvariantId;
-    use polars::prelude::*;
     use std::collections::BTreeMap;
 
     fn make_invariant(z: f64, max_ratio: f64, row_count: i64) -> Invariant<PolarsKind> {
