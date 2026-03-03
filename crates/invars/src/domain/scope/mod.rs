@@ -1,5 +1,5 @@
 mod display;
-mod error;
+pub mod error;
 mod from_str;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct ReportMetric {
     pub total_invariants: usize,
     pub evaluated_invariants: usize,
@@ -35,16 +35,5 @@ impl ReportMetric {
 
     pub fn has_violations(&self) -> bool {
         self.violations > 0
-    }
-}
-
-impl Default for ReportMetric {
-    fn default() -> Self {
-        Self {
-            total_invariants: 0,
-            evaluated_invariants: 0,
-            violations: 0,
-            execution_time_ms: 0,
-        }
     }
 }

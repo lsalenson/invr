@@ -39,7 +39,7 @@ impl Engine for EnginePolarsDataFrame {
         dataset: &Self::Dataset,
         spec: &Spec<Self::Kind>,
     ) -> ApplicationResult<Report> {
-        let violations = checks::run_all(df, spec.invariants())
+        let violations = checks::run_all(dataset, spec.invariants())
             .map_err(|e| ApplicationError::engine_failure(e.to_string()))?;
 
         let mut report = Report::new();

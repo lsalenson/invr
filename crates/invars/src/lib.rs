@@ -32,7 +32,7 @@
 //!
 //!
 //! # #[cfg(feature = "polars")]
-//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! # fn main() -> Result<(), Box<dyn std::error.rs::Error>> {
 //! use invars::prelude::*;
 //! use polars::prelude::*;
 //!
@@ -79,6 +79,7 @@ mod domain;
 
 #[cfg(feature = "polars")]
 pub mod infrastructure;
+pub mod interface;
 
 pub use crate::application::*;
 pub use crate::domain::*;
