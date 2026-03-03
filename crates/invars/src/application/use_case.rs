@@ -3,26 +3,22 @@ use crate::error::{ApplicationError, ApplicationResult};
 use crate::report::Report;
 use crate::spec::Spec;
 
-pub struct RunSpec<E, K>
+pub struct RunSpec<E>
 where
-    E: Engine<K>,
+    E: Engine,
 {
     engine: E,
-    _marker: std::marker::PhantomData<K>,
 }
 
-impl<E, K> RunSpec<E, K>
+impl<E> RunSpec<E>
 where
-    E: Engine<K>,
+    E: Engine,
 {
     pub fn new(engine: E) -> Self {
-        Self {
-            engine,
-            _marker: std::marker::PhantomData,
-        }
+        Self { engine }
     }
-    //TODO LOGGING + METRIC (ajout dans le report ?)
-    pub fn run(&self, dataset: &E::Dataset, spec: &Spec<K>) -> ApplicationResult<Report> {
+
+    pub fn run(&self, dataset: &E::Dataset, spec: &Spec<E::Kind>) -> ApplicationResult<Report> {
         spec.validate().map_err(ApplicationError::InvalidSpec)?;
 
         let report = self.engine.execute(dataset, spec)?;

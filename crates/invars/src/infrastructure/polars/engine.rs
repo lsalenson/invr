@@ -24,8 +24,9 @@ use polars::prelude::*;
 /// ```
 pub struct EnginePolarsDataFrame;
 
-impl Engine<PolarsKind> for EnginePolarsDataFrame {
+impl Engine for EnginePolarsDataFrame {
     type Dataset = DataFrame;
+    type Kind = PolarsKind;
 
     /// Executes all invariants from the provided `Spec` against the given `DataFrame`.
     ///
@@ -33,7 +34,11 @@ impl Engine<PolarsKind> for EnginePolarsDataFrame {
     ///
     /// Errors occurring during Polars expression evaluation are
     /// converted into `ApplicationError::engine_failure`.
-    fn execute(&self, df: &Self::Dataset, spec: &Spec<PolarsKind>) -> ApplicationResult<Report> {
+    fn execute(
+        &self,
+        dataset: &Self::Dataset,
+        spec: &Spec<Self::Kind>,
+    ) -> ApplicationResult<Report> {
         let violations = checks::run_all(df, spec.invariants())
             .map_err(|e| ApplicationError::engine_failure(e.to_string()))?;
 
