@@ -21,6 +21,7 @@ polars = ["dep:polars"]
 [dependencies]
 polars = { version = "0.53", features = ["lazy", "is_in", "abs", "strings", "diff"], optional = true }
 chrono = "0.4.41"
-
+serde = { version = "1.0.228", features = ["derive"] }
+serde_yaml = { version = "0.9.33"}
 [package.metadata.docs.rs]
 all-features = true

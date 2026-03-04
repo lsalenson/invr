@@ -1,6 +1,8 @@
 use std::{error::Error, fmt};
 
-use crate::{scope::Scope, severity::Severity};
+use crate::invariant::value_object::id::InvariantIdError;
+use crate::scope::error::ScopeError;
+use crate::{severity::Severity};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum InvariantError {
@@ -20,8 +22,6 @@ pub enum InvariantError {
         name: String,
     },
     InvalidScope {
-        invariant_id: String,
-        scope: Scope,
         expected: String,
     },
     UnexpectedSeverity {
@@ -59,14 +59,8 @@ impl InvariantError {
         Self::UnknownInvariant { name: name.into() }
     }
 
-    pub fn invalid_scope(
-        invariant_id: impl Into<String>,
-        scope: Scope,
-        expected: impl Into<String>,
-    ) -> Self {
+    pub fn invalid_scope(expected: impl Into<String>) -> Self {
         Self::InvalidScope {
-            invariant_id: invariant_id.into(),
-            scope,
             expected: expected.into(),
         }
     }
@@ -109,15 +103,8 @@ impl fmt::Display for InvariantError {
             InvariantError::UnknownInvariant { name } => {
                 write!(f, "unknown invariant: {name}")
             }
-            InvariantError::InvalidScope {
-                invariant_id,
-                scope,
-                expected,
-            } => {
-                write!(
-                    f,
-                    "invalid scope for invariant '{invariant_id}': got {scope}, expected {expected}"
-                )
+            InvariantError::InvalidScope { expected } => {
+                write!(f, "{expected}")
             }
             InvariantError::UnexpectedSeverity {
                 invariant_id,
@@ -134,5 +121,21 @@ impl fmt::Display for InvariantError {
 }
 
 impl Error for InvariantError {}
+
+impl From<InvariantIdError> for InvariantError {
+    fn from(value: InvariantIdError) -> Self {
+        InvariantError::InvalidId {
+            id: value.to_string(),
+        }
+    }
+}
+
+impl From<ScopeError> for InvariantError {
+    fn from(value: ScopeError) -> Self {
+        InvariantError::InvalidScope {
+            expected: value.to_string(),
+        }
+    }
+}
 
 pub type InvariantResult<T> = Result<T, InvariantError>;

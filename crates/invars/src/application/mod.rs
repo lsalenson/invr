@@ -1,3 +1,3 @@
 pub mod engine;
 pub mod error;
-pub mod use_case;
+pub mod use_cases;

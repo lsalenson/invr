@@ -10,7 +10,7 @@ impl FromStr for Severity {
         match s.trim().to_lowercase().as_str() {
             "info" | "i" => Ok(Severity::Info),
             "warn" | "warning" | "w" => Ok(Severity::Warn),
-            "error" | "err" | "e" => Ok(Severity::Error),
+            "error.rs" | "err" | "e" => Ok(Severity::Error),
             _ => Err(SeverityError::unknown(s)),
         }
     }

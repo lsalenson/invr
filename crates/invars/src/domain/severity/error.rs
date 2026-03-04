@@ -10,9 +10,9 @@ pub enum SeverityError {
 
 impl SeverityError {
     pub fn unknown(input: impl Into<String>) -> Self {
-         Self::UnknownSeverity {
-             input: input.into(),
-         }
+        Self::UnknownSeverity {
+            input: input.into(),
+        }
     }
 
     pub fn unexpected(expected: Severity, found: Severity) -> Self {

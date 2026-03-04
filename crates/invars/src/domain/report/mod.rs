@@ -6,8 +6,11 @@
 mod display;
 
 pub mod error;
+mod value_object;
+
 pub use error::{ReportError, ReportResult};
 
+use crate::report::value_object::metric::ReportMetric;
 use crate::severity::Severity;
 use crate::violation::Violation;
 use std::cmp::PartialEq;
@@ -15,12 +18,14 @@ use std::cmp::PartialEq;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Report {
     violations: Vec<Violation>,
+    metrics: ReportMetric,
 }
 
 impl Report {
     pub fn new() -> Self {
         Self {
             violations: Vec::new(),
+            metrics: Default::default(),
         }
     }
     pub fn validate(&self) -> ReportResult<()> {
@@ -31,9 +36,23 @@ impl Report {
         Ok(())
     }
     pub fn from_violations(violations: Vec<Violation>) -> Self {
-        Self { violations }
+        Self {
+            violations,
+            metrics: Default::default(),
+        }
     }
-
+    pub fn metrics(&self) -> &ReportMetric {
+        &self.metrics
+    }
+    pub fn set_violations(&mut self, violations: Vec<Violation>) {
+        self.violations = violations;
+    }
+    pub fn metrics_mut(&mut self) -> &mut ReportMetric {
+        &mut self.metrics
+    }
+    pub fn set_metrics(&mut self, metrics: ReportMetric) {
+        self.metrics = metrics;
+    }
     pub fn violations(&self) -> &[Violation] {
         &self.violations
     }

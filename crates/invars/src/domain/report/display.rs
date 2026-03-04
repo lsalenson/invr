@@ -6,7 +6,7 @@ impl fmt::Display for Report {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
             f,
-            "Report: {} violation(s) — {} info, {} warn, {} error — status: {}",
+            "Report: {} violation(s) — {} info, {} warn, {} error.rs — status: {}",
             self.len(),
             self.info_count(),
             self.warn_count(),
