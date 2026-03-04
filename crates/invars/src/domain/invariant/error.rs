@@ -2,7 +2,7 @@ use std::{error::Error, fmt};
 
 use crate::invariant::value_object::id::InvariantIdError;
 use crate::scope::error::ScopeError;
-use crate::{severity::Severity};
+use crate::severity::Severity;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum InvariantError {
