@@ -10,5 +10,5 @@ authors = ["Léo Salenson <leo.salenson@outlook.fr>"]
 description = "Declarative data validation engine using invariants executed on Polars DataFrames."
 keywords = ["data-validation", "invariants", "polars", "data-quality", "data"]
 categories = ["data-structures", "database", "science"]
-version = "0.1.0"
+version = "0.1.1"
 rust-version = "1.92.0"
