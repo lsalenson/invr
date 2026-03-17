@@ -26,37 +26,6 @@
 //! map() -> Option<Violation>
 //! ```
 //!
-//! ---
-//!
-//! ## Quick Example (Polars)
-//!
-//!
-//! # #[cfg(feature = "polars")]
-//! # fn main() -> Result<(), Box<dyn std::error.rs::Error>> {
-//! use invars::prelude::*;
-//! use polars::prelude::*;
-//!
-//! let df = df! {
-//!     "age" => [18, 25, 130],
-//! }?;
-//!
-//! let invariant = Invariant::new(
-//!     "age_between".to_string().try_into()?,
-//!     PolarsKind::ValueBetween,
-//!     Scope::Column { name: "age".into() },
-//! )
-//! .with_param("min", "0")
-//! .with_param("max", "120");
-//!
-//! let engine = EnginePolarsDataFrame::default();
-//! let violations = engine.evaluate(&df, vec![invariant])?;
-//!
-//! Ok(())
-//! # }
-//! #
-//! # #[cfg(not(feature = "polars"))]
-//! # fn main() {}
-//!
 //!
 //! ---
 //!
