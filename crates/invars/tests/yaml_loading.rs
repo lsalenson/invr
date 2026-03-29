@@ -78,7 +78,7 @@ invariants:
     fn invalid_yaml_returns_parse_error() {
         let bad = "invariants: [[[";
         let err = spec_from_str(bad).unwrap_err();
-        assert!(matches!(err, YamlLoadError::Parse(_)));
+        assert!(matches!(err, YamlError::Parse(_)));
     }
 
     #[test]
@@ -97,6 +97,6 @@ invariants:
       name: y
 "#;
         let err = spec_from_str(bad).unwrap_err();
-        assert!(matches!(err, YamlLoadError::Spec(_)));
+        assert!(matches!(err, YamlError::Spec(_)));
     }
 }

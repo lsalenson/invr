@@ -1,6 +1,6 @@
 [package]
 name = "invars"
-version = "0.1.4"
+version = "0.2.0"
 publish = true
 license = { workspace = true }
 authors = { workspace = true }
@@ -16,13 +16,13 @@ rust-version = { workspace = true }
 
 [features]
 default = []
-polars = ["dep:polars"]
-yaml = ["dep:serde_yml"]
+polars = ["dep:polars", "yaml"]
+yaml = ["dep:serde_yaml"]
 
 [dependencies]
 polars = { version = "0.53", features = ["lazy", "is_in", "abs", "strings", "diff"], optional = true }
 serde = { version = "1.0.228", features = ["derive"] }
-serde_yml = { version = "0.0.12", optional = true }
+serde_yaml = { version = "0.9.33", optional = true }
 chrono = "0.4.41"
 
 [dev-dependencies]

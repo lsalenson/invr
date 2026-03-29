@@ -31,7 +31,7 @@ target
 /target/
 **/target/
 
-
+.claude
 # Cargo lock (keep for binaries, ignore for libraries if you prefer)
 # Remove the next line if this is a binary application
 # Cargo.lock

@@ -48,6 +48,7 @@ mod domain;
 
 #[cfg(feature = "polars")]
 pub mod infrastructure;
+
 pub mod interface;
 
 pub use crate::application::*;
@@ -67,7 +68,7 @@ pub mod prelude {
     pub use crate::infrastructure::polars::kind::PolarsKind;
 
     #[cfg(feature = "yaml")]
-    pub use crate::interface::yaml::YamlLoadError;
+    pub use crate::interface::yaml::error::YamlError;
     #[cfg(all(feature = "yaml", feature = "polars"))]
     pub use crate::interface::yaml::spec_from_str;
 }
