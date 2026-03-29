@@ -1,0 +1,21 @@
+[package]
+name = "invars-py"
+version = "0.1.0"
+edition = { workspace = true }
+license = { workspace = true }
+authors = { workspace = true }
+repository = { workspace = true }
+rust-version = { workspace = true }
+description = "Python bindings for invars — run YAML data validation specs on pandas DataFrames."
+
+[lib]
+name = "invars_core"
+crate-type = ["cdylib"]
+
+[dependencies]
+invars = { path = "../invars", features = ["polars"] }
+polars = { version = "0.53", features = ["lazy", "csv", "parquet", "ipc", "is_in", "abs", "strings", "diff"] }
+pyo3 = { version = "0.23", features = ["extension-module"] }
+
+[features]
+extension-module = ["pyo3/extension-module"]

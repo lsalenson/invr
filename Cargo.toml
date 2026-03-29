@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/invars", "crates/invars-cli"]
+members = ["crates/invars", "crates/invars-cli", "crates/invars-py"]
 
 [workspace.package]
 edition = "2024"
