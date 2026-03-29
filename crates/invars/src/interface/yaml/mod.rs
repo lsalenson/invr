@@ -33,8 +33,7 @@ mod load {
     ///       min: "100"
     /// ```
     pub fn spec_from_str(s: &str) -> Result<Spec<PolarsKind>, YamlError> {
-        let yaml: SpecYaml<PolarsKindYaml> =
-            serde_yaml::from_str(s).map_err(YamlError::Parse)?;
+        let yaml: SpecYaml<PolarsKindYaml> = serde_yaml::from_str(s).map_err(YamlError::Parse)?;
         Spec::try_from(yaml).map_err(YamlError::Spec)
     }
 }

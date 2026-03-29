@@ -21,7 +21,6 @@ pub fn load_spec_from_path(path: &Path) -> Result<Spec<PolarsKind>, YamlError> {
 
 #[cfg(feature = "polars")]
 pub fn load_spec_from_str(content: &str) -> Result<Spec<PolarsKind>, YamlError> {
-    let dto: SpecYaml<PolarsKindYaml> =
-        serde_yaml::from_str(content).map_err(YamlError::Parse)?;
+    let dto: SpecYaml<PolarsKindYaml> = serde_yaml::from_str(content).map_err(YamlError::Parse)?;
     Spec::try_from(dto).map_err(YamlError::Spec)
 }
