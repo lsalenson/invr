@@ -38,7 +38,7 @@ pub fn plan(inv: &Invariant<PolarsKind>) -> Option<Expr> {
 /// - Returns a violation if `ratio > max_ratio`
 ///
 /// Produced metric (implicit in message):
-/// - null_ratio (float)
+/// - `null_ratio` (float)
 ///
 /// Note:
 /// - If `total_rows == 0`, behavior depends on the caller and should be

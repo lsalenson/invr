@@ -55,16 +55,19 @@ impl<K> Invariant<K> {
         &self.params
     }
 
+    #[must_use]
     pub fn with_severity(mut self, severity: Severity) -> Self {
         self.severity = severity;
         self
     }
 
+    #[must_use]
     pub fn with_params(mut self, params: BTreeMap<String, String>) -> Self {
         self.params = params;
         self
     }
 
+    #[must_use]
     pub fn with_param_value(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
         self.params.insert(key.into(), value.into());
         self
@@ -75,7 +78,7 @@ impl<K> Invariant<K> {
     }
 
     pub fn param(&self, key: &str) -> Option<&str> {
-        self.params.get(key).map(|s| s.as_str())
+        self.params.get(key).map(std::string::String::as_str)
     }
 
     pub fn require_param(&self, key: &str) -> InvariantResult<&str> {

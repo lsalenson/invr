@@ -3,7 +3,8 @@ mod from_str;
 
 pub(crate) use crate::invariant::value_object::id::error::InvariantIdError;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, serde::Serialize)]
+#[serde(transparent)]
 pub struct InvariantId(String);
 
 impl InvariantId {

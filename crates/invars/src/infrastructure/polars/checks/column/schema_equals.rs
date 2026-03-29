@@ -15,7 +15,7 @@ use polars::frame::DataFrame;
 /// Behavior:
 /// - Verifies that the invariant kind is `PolarsKind::SchemaEquals`
 /// - Extracts the expected `schema` parameter
-/// - Builds the actual schema string from the DataFrame columns
+/// - Builds the actual schema string from the `DataFrame` columns
 ///   using the format `name:dtype`
 /// - Compares the actual and expected schema strings
 /// - Returns a `Violation` if they differ
@@ -40,15 +40,15 @@ pub fn run_direct(df: &DataFrame, inv: &Invariant<PolarsKind>) -> Option<Violati
         .collect::<Vec<_>>()
         .join(",");
 
-    if actual != expected {
+    if actual == expected {
+        None
+    } else {
         Some(Violation::new(
             inv.id().clone(),
             inv.severity(),
             inv.scope().clone(),
             "schema mismatch".to_string(),
         ))
-    } else {
-        None
     }
 }
 

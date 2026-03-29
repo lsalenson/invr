@@ -55,7 +55,7 @@ pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
                 inv.id().clone(),
                 inv.severity(),
                 inv.scope().clone(),
-                format!("percentile out of range: {}", percentile),
+                format!("percentile out of range: {percentile}"),
             )
             .with_metric("percentile_value", MetricValue::Float(percentile)),
         )

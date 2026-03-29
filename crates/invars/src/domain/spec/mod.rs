@@ -69,8 +69,15 @@ impl<K> Spec<K> {
         self.invariants.iter()
     }
 
+    #[must_use]
     pub fn find_by_id(&self, id: &InvariantId) -> Option<&Invariant<K>> {
         self.invariants.iter().find(|inv| inv.id() == id)
+    }
+
+    /// Find an invariant by its string id. Convenience wrapper around [`find_by_id`](Self::find_by_id).
+    #[must_use]
+    pub fn find_by_str(&self, id: &str) -> Option<&Invariant<K>> {
+        self.invariants.iter().find(|inv| inv.id().as_str() == id)
     }
 }
 

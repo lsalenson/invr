@@ -16,8 +16,8 @@ use crate::violation::Violation;
 /// - Returns a single scalar representing the dataset size
 ///
 /// The resulting metric represents the raw `row_count` value.
-pub fn plan_row_count() -> Option<Expr> {
-    Some(len().cast(DataType::Int64))
+pub fn plan_row_count() -> Expr {
+    len().cast(DataType::Int64)
 }
 /// Converts the computed row count into a row-count-based violation.
 ///
@@ -104,23 +104,13 @@ mod tests {
     // -------------------------------------------------------------
 
     #[test]
-    fn test_plan_row_count_returns_expr() {
-        let expr = plan_row_count();
-        assert!(expr.is_some());
-    }
-
-    #[test]
     fn test_plan_row_count_evaluates_correct_length() {
         let df = df! {
             "a" => &[1, 2, 3, 4, 5]
         }
         .unwrap();
 
-        let result = df
-            .lazy()
-            .select([plan_row_count().unwrap()])
-            .collect()
-            .unwrap();
+        let result = df.lazy().select([plan_row_count()]).collect().unwrap();
 
         let value = result.columns()[0].get(0).unwrap();
         let count = value.try_extract::<i64>().unwrap();
