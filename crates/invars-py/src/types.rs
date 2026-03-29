@@ -53,9 +53,7 @@ impl PyReport {
 
     /// True if any error-severity violations were found.
     fn failed(&self) -> bool {
-        self.violations
-            .iter()
-            .any(|v| v.severity == "ERROR")
+        self.violations.iter().any(|v| v.severity == "ERROR")
     }
 
     fn __repr__(&self) -> String {

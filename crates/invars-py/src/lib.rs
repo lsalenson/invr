@@ -93,7 +93,7 @@ fn run_file(spec: &str, data: &str) -> PyResult<PyReport> {
         other => {
             return Err(pyo3::exceptions::PyValueError::new_err(format!(
                 "unsupported file format: '{other}'. Use .csv, .parquet, or .ipc"
-            )))
+            )));
         }
     };
 
