@@ -16,13 +16,13 @@ Define **invariants** (validation rules) and evaluate them against a dataset usi
 
 ```toml
 [dependencies]
-invars = { version = "0.1", features = ["polars"] }
+invars = { version = "0.2", features = ["polars"] }
 ```
 
 To also load specs from YAML:
 
 ```toml
-invars = { version = "0.1", features = ["polars", "yaml"] }
+invars = { version = "0.2", features = ["polars", "yaml"] }
 ```
 
 ## Quick start
