@@ -48,8 +48,12 @@ pub fn run_all(df: &DataFrame, invariants: &[Invariant<PolarsKind>]) -> CheckRes
         }
     }
 
+    // Row count is injected into uniqueness checks that need it as context.
+    let row_count = df.height().to_string();
+
     let mut projections = Vec::with_capacity(invariants.len());
-    let mut planned_invariants = Vec::with_capacity(invariants.len());
+    // Store owned invariants so we can inject row_count_cache where needed.
+    let mut planned_invariants: Vec<Invariant<PolarsKind>> = Vec::with_capacity(invariants.len());
 
     for inv in invariants {
         match inv.kind() {
@@ -59,10 +63,25 @@ pub fn run_all(df: &DataFrame, invariants: &[Invariant<PolarsKind>]) -> CheckRes
             | PolarsKind::SchemaEquals => {
                 // already handled in direct phase
             }
-            _ => {
-                if let Some(expr) = plan_expr(inv) {
-                    projections.push(expr.alias(inv.id().as_str()));
-                    planned_invariants.push(inv);
+            kind => {
+                // Uniqueness checks require row_count_cache; inject it automatically
+                // when the caller has not provided it explicitly.
+                let enriched;
+                let effective = match kind {
+                    PolarsKind::Unique
+                    | PolarsKind::CompositeUnique
+                    | PolarsKind::DuplicateRatioMax
+                        if !inv.has_param("row_count_cache") =>
+                    {
+                        enriched = inv.clone().with_param_value("row_count_cache", &row_count);
+                        &enriched
+                    }
+                    _ => inv,
+                };
+
+                if let Some(expr) = plan_expr(effective) {
+                    projections.push(expr.alias(effective.id().as_str()));
+                    planned_invariants.push(effective.clone());
                 }
             }
         }
@@ -74,7 +93,7 @@ pub fn run_all(df: &DataFrame, invariants: &[Invariant<PolarsKind>]) -> CheckRes
 
     let result = df.clone().lazy().select(projections).collect()?;
 
-    for inv in planned_invariants {
+    for inv in &planned_invariants {
         let col = result.column(inv.id().as_str())?;
         let value = col.get(0)?;
         if let Some(v) = map_violation(inv, value) {
@@ -117,9 +136,9 @@ fn plan_expr(inv: &Invariant<PolarsKind>) -> Option<Expr> {
         PolarsKind::CompositeUnique => unique::composite_unique::plan(inv),
         PolarsKind::DuplicateRatioMax => unique::duplicate_ratio_max::plan(inv),
 
-        PolarsKind::RowCountMin => count::plan_row_count(),
-        PolarsKind::RowCountMax => count::plan_row_count(),
-        PolarsKind::RowCountBetween => count::plan_row_count(),
+        PolarsKind::RowCountMin => Some(count::plan_row_count()),
+        PolarsKind::RowCountMax => Some(count::plan_row_count()),
+        PolarsKind::RowCountBetween => Some(count::plan_row_count()),
 
         PolarsKind::ValueMin => numeric::value_min::plan(inv),
         PolarsKind::ValueMax => numeric::value_max::plan(inv),

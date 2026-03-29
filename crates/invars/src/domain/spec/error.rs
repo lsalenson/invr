@@ -36,7 +36,7 @@ impl Error for SpecError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             SpecError::InvalidInvariant { error, .. } => Some(error),
-            _ => None,
+            SpecError::DuplicateInvariantId { .. } => None,
         }
     }
 }

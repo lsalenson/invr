@@ -68,7 +68,9 @@ impl TryFrom<InvariantYaml<PolarsKindYaml>> for Invariant<PolarsKind> {
             InvariantId::new(value.id)?,
             PolarsKind::try_from(value.kind)?,
             Scope::try_from(value.scope)?,
-        ))
+        )
+        .with_severity(value.severity.into())
+        .with_params(value.params))
     }
 }
 

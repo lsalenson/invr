@@ -19,6 +19,10 @@ where
         Self { engine }
     }
 
+    /// # Errors
+    ///
+    /// Returns [`ApplicationError`](crate::error::ApplicationError) if the spec is invalid,
+    /// the engine fails to execute, or the resulting report is invalid.
     pub fn run(&self, dataset: &E::Dataset, spec: &Spec<E::Kind>) -> ApplicationResult<Report> {
         spec.validate().map_err(ApplicationError::InvalidSpec)?;
         let start = Instant::now();

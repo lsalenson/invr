@@ -39,15 +39,15 @@ pub fn run_direct(df: &DataFrame, inv: &Invariant<PolarsKind>) -> Option<Violati
     let expected = inv.require_param("dtype").ok()?;
     let actual = df.column(name).ok()?.dtype().to_string();
 
-    if actual != expected {
+    if actual == expected {
+        None
+    } else {
         Some(Violation::new(
             inv.id().clone(),
             inv.severity(),
             inv.scope().clone(),
             format!("dtype '{actual}' != expected '{expected}'"),
         ))
-    } else {
-        None
     }
 }
 

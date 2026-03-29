@@ -72,7 +72,7 @@ pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
                 inv.id().clone(),
                 inv.severity(),
                 inv.scope().clone(),
-                format!("outlier ratio {:.4} > {:.4}", ratio, max_ratio),
+                format!("outlier ratio {ratio:.4} > {max_ratio:.4}"),
             )
             .with_metric("outlier_ratio", MetricValue::Float(ratio))
             .with_metric("outlier_count", MetricValue::Int(outlier_count)),

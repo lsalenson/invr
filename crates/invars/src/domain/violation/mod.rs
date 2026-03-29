@@ -14,7 +14,7 @@ use crate::violation::error::{ViolationError, ViolationResult};
 use crate::violation::value_object::metric_value::MetricValue;
 use std::collections::BTreeMap;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct Violation {
     invariant_id: InvariantId,
     severity: Severity,
@@ -90,11 +90,13 @@ impl Violation {
         self.metrics.get(name)
     }
 
+    #[must_use]
     pub fn with_metric(mut self, name: impl Into<String>, value: MetricValue) -> Self {
         self.metrics.insert(name.into(), value);
         self
     }
 
+    #[must_use]
     pub fn with_example(mut self, example: impl Into<String>) -> Self {
         self.examples.push(example.into());
         self

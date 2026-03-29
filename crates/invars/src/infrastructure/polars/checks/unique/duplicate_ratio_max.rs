@@ -59,7 +59,7 @@ pub fn map(inv: &Invariant<PolarsKind>, value: AnyValue) -> Option<Violation> {
                 inv.id().clone(),
                 inv.severity(),
                 inv.scope().clone(),
-                format!("duplicate ratio {:.4} > {:.4}", ratio, max_ratio),
+                format!("duplicate ratio {ratio:.4} > {max_ratio:.4}"),
             )
             .with_metric("duplicate_ratio", MetricValue::Float(ratio))
             .with_metric("duplicate_count", MetricValue::Int(duplicate_count)),
