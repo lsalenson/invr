@@ -17,9 +17,8 @@ pub fn load_dataframe(path: &Path) -> Result<DataFrame, Box<dyn std::error::Erro
             let file = std::fs::File::open(path)?;
             Ok(IpcReader::new(file).finish()?)
         }
-        other => Err(format!(
-            "unsupported file format: '{other}'. Use .csv, .parquet, or .ipc"
-        )
-        .into()),
+        other => {
+            Err(format!("unsupported file format: '{other}'. Use .csv, .parquet, or .ipc").into())
+        }
     }
 }

@@ -8,7 +8,12 @@ use crate::cli::Format;
 use crate::loader::load_dataframe;
 use crate::output;
 
-pub fn execute(spec_path: &Path, data_path: &Path, format: &Format, fail_on_violations: bool) -> i32 {
+pub fn execute(
+    spec_path: &Path,
+    data_path: &Path,
+    format: &Format,
+    fail_on_violations: bool,
+) -> i32 {
     let spec = match load_spec_from_path(spec_path) {
         Ok(s) => s,
         Err(e) => {
