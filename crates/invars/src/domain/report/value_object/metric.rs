@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq, Default, serde::Serialize)]
 pub struct ReportMetric {
     pub total_invariants: usize,
     pub evaluated_invariants: usize,

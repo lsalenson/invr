@@ -15,14 +15,14 @@ impl fmt::Display for Violation {
         if !self.metrics.is_empty() {
             writeln!(f, "  metrics:")?;
             for (key, value) in &self.metrics {
-                writeln!(f, "    - {}: {:?}", key, value)?;
+                writeln!(f, "    - {key}: {value:?}")?;
             }
         }
 
         if !self.examples.is_empty() {
             writeln!(f, "  examples:")?;
             for example in &self.examples {
-                writeln!(f, "    - {}", example)?;
+                writeln!(f, "    - {example}")?;
             }
         }
 

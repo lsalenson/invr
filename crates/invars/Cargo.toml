@@ -17,11 +17,16 @@ rust-version = { workspace = true }
 [features]
 default = []
 polars = ["dep:polars"]
+yaml = ["dep:serde_yml"]
 
 [dependencies]
 polars = { version = "0.53", features = ["lazy", "is_in", "abs", "strings", "diff"], optional = true }
 serde = { version = "1.0.228", features = ["derive"] }
+serde_yml = { version = "0.0.12", optional = true }
 chrono = "0.4.41"
+
+[dev-dependencies]
+serde_json = "1"
 
 [package.metadata.docs.rs]
 all-features = true

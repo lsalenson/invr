@@ -2,7 +2,8 @@ mod display;
 pub mod error;
 mod from_str;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum Scope {
     Dataset,
     Column { name: String },
@@ -21,10 +22,11 @@ impl Scope {
         matches!(self, Scope::Dataset)
     }
 
+    #[must_use]
     pub fn column_name(&self) -> Option<&str> {
         match self {
             Scope::Column { name } => Some(name),
-            _ => None,
+            Scope::Dataset => None,
         }
     }
 }

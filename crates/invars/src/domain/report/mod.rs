@@ -15,7 +15,7 @@ use crate::severity::Severity;
 use crate::violation::Violation;
 use std::cmp::PartialEq;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct Report {
     violations: Vec<Violation>,
     metrics: ReportMetric,
@@ -72,30 +72,36 @@ impl Report {
         self.violations.extend(violations);
     }
 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.violations.is_empty()
     }
 
+    #[must_use]
     pub fn len(&self) -> usize {
         self.violations.len()
     }
 
+    #[must_use]
     pub fn failed(&self) -> bool {
         self.violations.iter().any(|v| v.severity().is_error())
     }
 
+    #[must_use]
     pub fn has_errors(&self) -> bool {
         self.violations
             .iter()
             .any(|v| matches!(v.severity(), Severity::Error))
     }
 
+    #[must_use]
     pub fn has_warnings(&self) -> bool {
         self.violations
             .iter()
             .any(|v| v.severity() == Severity::Warn)
     }
 
+    #[must_use]
     pub fn count_by_severity(&self, severity: Severity) -> usize {
         self.violations
             .iter()
@@ -103,14 +109,17 @@ impl Report {
             .count()
     }
 
+    #[must_use]
     pub fn error_count(&self) -> usize {
         self.count_by_severity(Severity::Error)
     }
 
+    #[must_use]
     pub fn warn_count(&self) -> usize {
         self.count_by_severity(Severity::Warn)
     }
 
+    #[must_use]
     pub fn info_count(&self) -> usize {
         self.count_by_severity(Severity::Info)
     }
