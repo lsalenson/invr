@@ -3,9 +3,9 @@ mod types;
 
 use std::path::Path;
 
-use invars::infrastructure::polars::EnginePolarsDataFrame;
-use invars::interface::yaml::import::load_spec_from_path;
-use invars::use_cases::run_spec::RunSpec;
+use invr::infrastructure::polars::EnginePolarsDataFrame;
+use invr::interface::yaml::import::load_spec_from_path;
+use invr::use_cases::run_spec::RunSpec;
 use polars::prelude::*;
 use pyo3::prelude::*;
 
@@ -122,7 +122,7 @@ fn run_file(spec: &str, data: &str) -> PyResult<PyReport> {
 }
 
 #[pymodule]
-fn invars_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn invr_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyReport>()?;
     m.add_class::<PyViolation>()?;
     m.add_function(wrap_pyfunction!(run, m)?)?;
