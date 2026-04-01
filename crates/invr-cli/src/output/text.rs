@@ -5,7 +5,7 @@ pub fn print(report: &Report) {
     let violations = report.violations();
 
     println!(
-        "invars report — {} invariants | {} violations | {}ms",
+        "invr report — {} invariants | {} violations | {}ms",
         metrics.total_invariants, metrics.violations, metrics.execution_time_ms
     );
 

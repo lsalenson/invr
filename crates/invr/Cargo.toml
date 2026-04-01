@@ -1,5 +1,5 @@
 [package]
-name = "invars"
+name = "invr"
 version = "0.2.0"
 publish = true
 license = { workspace = true }
@@ -7,8 +7,8 @@ authors = { workspace = true }
 edition = { workspace = true }
 repository = { workspace = true }
 description = { workspace = true }
-documentation = "https://docs.rs/invars"
-homepage = "https://github.com/lsalenson/invars"
+documentation = "https://docs.rs/invr"
+homepage = "https://github.com/lsalenson/invr"
 readme = "../../README.md"
 keywords = { workspace = true }
 categories = { workspace = true }

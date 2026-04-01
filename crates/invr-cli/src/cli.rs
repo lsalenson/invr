@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::{Parser, ValueEnum};
 
 #[derive(Parser)]
-#[command(name = "invars", version, about = "Declarative data validation CLI")]
+#[command(name = "invr", version, about = "Declarative data validation CLI")]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Command,

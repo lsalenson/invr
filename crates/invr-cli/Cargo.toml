@@ -1,21 +1,21 @@
 [package]
-name = "invars-cli"
+name = "invr-cli"
 version = "0.1.0"
 edition = { workspace = true }
 license = { workspace = true }
 authors = { workspace = true }
 repository = { workspace = true }
 rust-version = { workspace = true }
-description = "CLI for running invars data validation specs against Parquet and CSV files."
+description = "CLI for running invr data validation specs against Parquet and CSV files."
 keywords = ["data-validation", "cli", "polars", "data-quality"]
 categories = ["command-line-utilities"]
 
 [[bin]]
-name = "invars"
+name = "invr"
 path = "src/main.rs"
 
 [dependencies]
-invars = { path = "../invars", features = ["polars"] }
+invars = { path = "../invr", features = ["polars"] }
 polars = { version = "0.53", features = ["lazy", "csv", "parquet", "ipc"] }
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
