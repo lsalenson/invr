@@ -52,7 +52,7 @@ pip install invars
 ## Quick Start — Rust (programmatic spec)
 
 ```rust
-use invars::prelude::*;
+use invr::prelude::*;
 use polars::prelude::*;
 
 let df = df![
@@ -92,7 +92,7 @@ if report.failed() {
 ## Quick Start — Rust (YAML spec)
 
 ```rust
-use invars::prelude::*;
+use invr::prelude::*;
 
 let yaml = std::fs::read_to_string("spec.yaml")?;
 let spec = spec_from_str(&yaml)?;
@@ -361,8 +361,8 @@ RunSpec::new(engine: E) -> Self
 ### YAML loading (`yaml` feature)
 
 ```rust
-use invars::interface::yaml::spec_from_str;
-use invars::interface::yaml::load_spec_from_path;
+use invr::interface::yaml::spec_from_str;
+use invr::interface::yaml::load_spec_from_path;
 
 spec_from_str(yaml: &str) -> Result<Spec<PolarsKind>, YamlError>
 load_spec_from_path(path: &Path) -> Result<Spec<PolarsKind>, YamlError>
@@ -448,7 +448,7 @@ crates/
 The core domain is engine-agnostic. To implement a custom engine:
 
 ```rust
-use invars::application::engine::Engine;
+use invr::application::engine::Engine;
 
 struct MyEngine;
 

@@ -4,13 +4,13 @@ build-backend = "maturin"
 
 [project]
 name = "invr"
-version = "0.2.2"
-description = "Declarative data validation for pandas DataFrames — powered by Rust."
+version = "0.2.3"
+description = "Declarative data validation for pandas DataFrames — 33 built-in rules, powered by Rust and Polars."
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.9"
 dependencies = ["pandas>=1.5", "pyarrow>=10.0"]
-keywords = ["data-validation", "data-quality", "pandas", "invariants"]
+keywords = ["data-validation", "data-quality", "pandas", "invariants", "polars"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -19,7 +19,15 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Rust",
     "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Database",
 ]
+
+[project.urls]
+Homepage = "https://github.com/lsalenson/invr"
+Repository = "https://github.com/lsalenson/invr"
+Documentation = "https://docs.rs/invr"
+"Bug Tracker" = "https://github.com/lsalenson/invr/issues"
 
 [project.optional-dependencies]
 dev = ["maturin", "pytest", "pandas", "pyarrow"]
