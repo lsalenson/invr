@@ -4,7 +4,7 @@
 /// Invariant → Spec → RunSpec::run → Report
 #[cfg(feature = "polars")]
 mod tests {
-    use invars::prelude::*;
+    use invr::prelude::*;
     use polars::prelude::*;
 
     fn make_df() -> DataFrame {

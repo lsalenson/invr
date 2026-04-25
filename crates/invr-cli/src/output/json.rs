@@ -1,4 +1,4 @@
-use invars::report::Report;
+use invr::report::Report;
 use serde::Serialize;
 
 #[derive(Serialize)]

@@ -1,7 +1,7 @@
 /// Integration tests for YAML spec loading.
 #[cfg(all(feature = "yaml", feature = "polars"))]
 mod tests {
-    use invars::prelude::*;
+    use invr::prelude::*;
     use polars::prelude::*;
 
     const SPEC_YAML: &str = r#"

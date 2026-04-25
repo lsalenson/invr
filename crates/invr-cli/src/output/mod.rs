@@ -2,7 +2,7 @@ pub mod json;
 pub mod text;
 
 use crate::cli::Format;
-use invars::report::Report;
+use invr::report::Report;
 
 pub fn print(report: &Report, format: &Format) {
     match format {

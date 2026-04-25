@@ -1,4 +1,4 @@
-use invars::report::Report;
+use invr::report::Report;
 
 pub fn print(report: &Report) {
     let metrics = report.metrics();

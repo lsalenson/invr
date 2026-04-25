@@ -1,8 +1,8 @@
 use std::path::Path;
 
-use invars::interface::yaml::import::load_spec_from_path;
-use invars::prelude::*;
-use invars::use_cases::run_spec::RunSpec;
+use invr::interface::yaml::import::load_spec_from_path;
+use invr::prelude::*;
+use invr::use_cases::run_spec::RunSpec;
 
 use crate::cli::Format;
 use crate::loader::load_dataframe;
